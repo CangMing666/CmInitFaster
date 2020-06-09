@@ -1,0 +1,84 @@
+// 构建Maven依赖库脚本
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+// 仓库名
+def repoName = 'maven'
+// 项目主页
+def siteUrl = SITE_URL
+// 项目的git地址
+def gitUrl = GIT_URL
+// 发布到JCenter上的项目名字
+def libName = POM_ARTIFACT_ID
+// 项目描述
+def projectDescription = PROJECT_DESC
+
+group = GROUP
+version = VERSION_NAME
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+// 配置maven库，生成POM.xml文件
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'jar'
+                //项目描述
+                name projectDescription
+                url siteUrl
+                licenses {
+                    license {
+                        //开源协议
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        //开发者的个人信息
+                        id 'ksdeveloper'
+                        name 'ksdeveloper'
+                        email 'kaishustory@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+//上传到JCenter
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")    //读取 local.properties 文件里面的 bintray.user
+    key = properties.getProperty("bintray.apikey")   //读取 local.properties 文件里面的 bintray.apikey
+    configurations = ['archives']
+    pkg {
+        //注意：这里的repo值必须要和创建Maven仓库的时候的名字一样
+        repo = repoName
+        //发布到JCenter上的项目名字
+        name = libName
+        //项目描述
+        desc = projectDescription
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
+}
+

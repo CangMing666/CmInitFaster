@@ -1,0 +1,3 @@
+rootProject.name='CmInitFaster'
+include ':app'
+include ':initfaster'
